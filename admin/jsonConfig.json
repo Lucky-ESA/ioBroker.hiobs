@@ -1,0 +1,45 @@
+{
+    "i18n": true,
+    "type": "panel",
+    "items": {
+        "_headerAdapter": {
+            "type": "header",
+            "text": "Adapter settings for hiob",
+            "size": 2
+        },
+        "port": {
+            "type": "port",
+            "newLine": true,
+            "label": "select a port",
+            "sm": 3,
+            "md": 3,
+            "lg": 3,
+            "xs": 3,
+            "default": 8095
+        },
+        "sql_instance": {
+            "newLine": true,
+            "type": "instance",
+            "label": "sql",
+            "sm": 6,
+            "md": 6,
+            "lg": 3,
+            "disabled": "data.history_instance != \"\"",
+            "hidden": "data.history_instance != \"\"",
+            "adapter": "sql",
+            "default": ""
+        },
+        "history_instance": {
+            "newLine": true,
+            "type": "instance",
+            "label": "sql",
+            "sm": 6,
+            "md": 6,
+            "lg": 3,
+            "disabled": "data.sql_instance != \"\"",
+            "hidden": "data.sql_instance != \"\"",
+            "adapter": "history",
+            "default": ""
+        }
+    }
+}
