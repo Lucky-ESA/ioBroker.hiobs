@@ -79,8 +79,8 @@ class Hiobs extends utils.Adapter {
 
         const check_port = await this.getPortAsync(this.config.port);
         if (check_port !== this.config.port) {
-            this.log_translator("error", "port_use", this.config.port);
-            this.terminate(1);
+            this.log_translator("warn", "port_use", this.config.port, check_port);
+            this.config.port = check_port;
         }
         const loglevel = await this.getForeignStateAsync(`system.adapter.${this.namespace}.logLevel`);
         if (loglevel && loglevel.val) {
