@@ -157,10 +157,10 @@ class Hiobs extends utils.Adapter {
                 let check = false;
                 for (const client of this.ws.clients) {
                     if (client.readyState === WebSocket.OPEN) {
-                        const status = this.clients[client.ip] ? this.clients[client.ip].status() : "";
+                        const status = this.clients[client.ip] ? this.clients[client.ip].status() : false;
                         this.log_translator("debug", "check_client", `${client.ip} - ${status}`);
                         check = true;
-                        this.clients[client.ip].onPing();
+                        if (status) this.clients[client.ip].onPing();
                     }
                 }
                 if (!check) {
