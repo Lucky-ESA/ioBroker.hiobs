@@ -17,19 +17,18 @@
                 "uk": "початковий випуск"
             }
         },
-        "title": "VISU",
         "titleLang": {
-            "en": "VISU",
-            "de": "VISU",
-            "ru": "ВИСУ",
-            "pt": "VISU",
-            "nl": "VISU",
-            "fr": "VISUEL",
-            "it": "VISU",
-            "es": "VISUALIZAR",
-            "pl": "VISU",
-            "zh-cn": "签证",
-            "uk": "VISU"
+            "en": "HIOBS",
+            "de": "HIOBS",
+            "ru": "HIOBS",
+            "pt": "HIOBS",
+            "nl": "HIOBS",
+            "fr": "HIOBS",
+            "it": "HIOBS",
+            "es": "HIOBS",
+            "pl": "HIOBS",
+            "zh-cn": "HIOBS",
+            "uk": "HIOBS"
         },
         "desc": {
             "en": "Andriod HIOB",
