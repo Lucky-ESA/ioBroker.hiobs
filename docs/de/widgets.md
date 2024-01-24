@@ -1,54 +1,22 @@
-# Widgets
+![Logo](../../admin/hiob.png)
 
-## Allgemein
+-   [Zurück zur Beschreibung](/docs/de/README.md)
+-   [Schritt 1: Installation und APP Einrichtung](app.md)
+-   [Schritt 2: ENUMS erstellen](enum.md)
+-   [Schritt 4: Screnns erstellen](sreens.md)
+-   [Schritt 5: Backups erstellen](backups.md)
 
-* Alle Templates benötigen einen Namen, der (sofern Value nicht gesetzt wurde) auch als Anzeige Namen für das Widget benutzt wird
-* Das Value Feld kann dabei optional auch ausgefüllt werden, falls der Anzeigename vom Template Namen abweichen soll
+## Widgets erstellen `Template Settings`
 
-## Button
+# Schritt 3: Widgets erstellen
 
-* Type: boolean
-* Einfacher Schaltknopf
-* Button Text: Dieser Text wird im Button angezeigt (siehe Bild)
-* Device & Datapoint\*: Hier wird ausgewählt, welcher Datenpunkt beim Drücken geschalten wird
+-   [Button erstellen](button.md)
+-   [Value erstellen](value.md)
+-   [Advanced erstellen](advanced.md)
+-   [Switch with Slider erstellen](switch_w_slider.md)
+-   [Division Line erstellen](division.md)
+-   [Web View erstellen](webview.md)
+-   [Table erstellen](table.md)
+-   [Graph (only sql Adapter) erstellen](graph.md)
 
-<details>
-
-<summary>Einstellungsmenü</summary>
-
-<img src=".gitbook/assets/test.jpg" alt="" data-size="original">
-
-</details>
-
-## Value
-
-* Type: all
-* Zeigt den aktuellen Wert eines Datenpunktes an
-* Round to: Dieser Wert gibt an, auf wie viele Nachkommastellen gerundet werden soll
-* Device & Datapoint\*: Hier wird ausgewählt, wessen Wert angezeigt werden soll
-
-<details>
-
-<summary>Einstellungsmenü</summary>
-
-<img src=".gitbook/assets/template_value.jpg" alt="" data-size="original">
-
-</details>
-
-## Switch with slider
-
-* Type: boolean/int/boolean
-* Ein einfacher Schalter
-* optional mit Slider (für z.B. Dimmerfunktionen)
-* Slider Menü lässt sich durch langes drücken (auf das Widget) öffnen
-
-## Advanced
-
-* This Widget is under development
-* Dieses Widget bietet viele verschiedene Funktion und "Trigger" Optionen
-* _Diese Widget soll in Zukunft die Design- und Gestaltungsfreiheit stark erhöhen_
-
-## Web\_View
-
-* Anzeige einer Webseite
-* Bei dynamischen Seiten bitte JavaScript erlauben
+![Overview](img/app_overview.png)

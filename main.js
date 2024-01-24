@@ -36,6 +36,7 @@ class Hiobs extends utils.Adapter {
         this.createForeignDataPoint = helper.createForeignDataPoint;
         this.loadKnownDevices = helper.loadKnownDevices;
         this.createDevice = helper.createDevice;
+        this.subScribe = helper.subScribe;
         this.setNewStates = helper.setNewStates;
         this.createTemplates = helper.createTemplates;
         this.devices = [];
@@ -60,6 +61,7 @@ class Hiobs extends utils.Adapter {
             createTemp: "templateSettingCreate",
             getTemp: "getTemplatesSetting",
             historyDataUpdate: "historyDataUpdate",
+            notify: "notification",
         };
     }
 
@@ -307,6 +309,15 @@ class Hiobs extends utils.Adapter {
                                 }
                             }
                         }
+                    }
+                }
+                if (command === "sendNotification") {
+                    const map = {
+                        onlySendNotification: true,
+                        content: state.val,
+                    };
+                    if (this.clients[this.devices[index].ip]) {
+                        this.clients[this.devices[index].ip].sendNotify(map);
                     }
                 }
             } else if (this.subDatapoints[id] && this.subDatapoints[id].val != state.val) {
