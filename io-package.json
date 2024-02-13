@@ -75,7 +75,10 @@
     "native": {
         "port": 8095,
         "sql_instance": "",
-        "history_instance": ""
+        "history_instance": "",
+        "useCert": false,
+        "certPath": "",
+        "keyPath": ""
     },
     "objects": [],
     "instanceObjects": [

@@ -17,6 +17,44 @@
             "xs": 3,
             "default": 8095
         },
+        "useCert": {
+            "type": "checkbox",
+            "label": "useCert",
+            "tooltip": "useCert_tooltip",
+            "default": false,
+            "newLine": true
+        },
+        "staticLink": {
+            "type": "staticLink",
+            "text": "link to description",
+            "href": "https://github.com/moba15/ioBroker.hiob/blob/main/docs%2Fde%2FsecureCon.md",
+            "icon": "info",
+            "newLine": true
+        },
+        "certPath": {
+            "newLine": true,
+            "type": "text",
+            "label": "certPath",
+            "tooltip": "certPath_tooltip",
+            "disabled": "!data.useCert",
+            "hidden": "!data.useCert",
+            "sm": 12,
+            "md": 6,
+            "lg": 3,
+            "default": ""
+        },
+        "keyPath": {
+            "newLine": true,
+            "type": "text",
+            "label": "keyPath",
+            "tooltip": "keyPath_tooltip",
+            "disabled": "!data.useCert",
+            "hidden": "!data.useCert",
+            "sm": 12,
+            "md": 6,
+            "lg": 3,
+            "default": ""
+        },
         "sql_instance": {
             "newLine": true,
             "type": "instance",

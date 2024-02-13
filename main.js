@@ -15,6 +15,8 @@ const { WebListener } = require("./lib/listener");
 const helper = require("./lib/helper");
 const tl = require("./lib/translator");
 const format = require("util").format;
+const { createServer } = require("https");
+const fs = require("fs");
 const restartTimeout = 1000;
 
 class Hiobs extends utils.Adapter {
@@ -62,6 +64,8 @@ class Hiobs extends utils.Adapter {
             getTemp: "getTemplatesSetting",
             historyDataUpdate: "historyDataUpdate",
             notify: "notification",
+            wrongAesKey: "wrongAesKey",
+            setNewAes: "setNewAes",
         };
     }
 
@@ -115,7 +119,17 @@ class Hiobs extends utils.Adapter {
     }
 
     async connectAPP() {
-        this.ws = new WebSocketServer({ port: this.config.port });
+        if (this.config.useCert) {
+            const server = createServer({
+                cert: fs.readFileSync(this.config.certPath),
+                key: fs.readFileSync(this.config.keyPath),
+            });
+            this.log.info("[Server] Starting secure server...");
+            this.ws = new WebSocketServer({ server: server, port: this.config.port });
+        } else {
+            this.log.info("[Server] Starting server...");
+            this.ws = new WebSocketServer({ port: this.config.port });
+        }
         this.ws.on("error", (e) => {
             this.log_translator("error", "Error", `WebSocket - ${e.message}`);
             this.setState("info.connection", false, true);
@@ -291,7 +305,7 @@ class Hiobs extends utils.Adapter {
                     this.setAckFlag(id);
                     if (command === "approved") {
                         if (state.val) {
-                            const key = this.makekey(512);
+                            const key = this.makekey(512, false);
                             const map = {
                                 type: this.answers.loginKey,
                                 key: key,
@@ -310,14 +324,22 @@ class Hiobs extends utils.Adapter {
                             }
                         }
                     }
-                }
-                if (command === "sendNotification") {
+                } else if (command === "sendNotification") {
                     const map = {
                         onlySendNotification: true,
                         content: state.val,
                     };
                     if (this.clients[this.devices[index].ip]) {
                         this.clients[this.devices[index].ip].sendNotify(map);
+                    }
+                } else if (command === "aesKey_new") {
+                    this.setAckFlag(id, { val: false });
+                    if (this.clients[this.devices[index].ip]) {
+                        this.setNewKey(this.clients[this.devices[index].ip], dev_id);
+                    }
+                } else if (command === "aesKey_active") {
+                    if (this.clients[this.devices[index].ip]) {
+                        this.clients[this.devices[index].ip].aes_check();
                     }
                 }
             } else if (this.subDatapoints[id] && this.subDatapoints[id].val != state.val) {
@@ -330,6 +352,18 @@ class Hiobs extends utils.Adapter {
                 delete this.subDatapoints[id];
             }
         }
+    }
+
+    /**
+     * Is called if a subscribed state changes
+     * @param {object} id
+     * @param {string} client
+     */
+    async setNewKey(id, client) {
+        const random_key = this.makekey(6, true);
+        await this.setStateAsync(`${client}.aesKey`, random_key, true);
+        id.aes_check();
+        id.setNewKey();
     }
 
     /**
@@ -443,9 +477,12 @@ class Hiobs extends utils.Adapter {
     /**
      * @param {number} length
      */
-    makekey(length) {
+    makekey(length, woCharacters) {
         let result = "";
-        const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-\\/&%$!;<>*+#";
+        let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-\\/&%$!;<>*+#";
+        if (woCharacters) {
+            characters = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz0123456789";
+        }
         const charactersLength = characters.length;
         for (let i = 0; i < length; i++) {
             result += characters.charAt(crypto.randomInt(0, charactersLength));

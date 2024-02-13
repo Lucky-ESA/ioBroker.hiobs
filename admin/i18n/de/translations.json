@@ -2,5 +2,12 @@
     "hiob adapter settings": "Adaptereinstellungen für Hiob",
     "select a port": "Wählen Sie einen Port aus",
     "sql": "Wählen Sie eine SQL-Instanz aus",
-    "history": "Wählen Sie eine HISTORY-Instanz aus"
+    "history": "Wählen Sie eine HISTORY-Instanz aus",
+    "useCert": "Verwenden Sie ein Zertifikat für die Verbindung",
+    "useCert_tooltip": "Verwenden Sie ein Zertifikat für die Verbindung",
+    "certPath": "Pfad zum Zertifikat",
+    "certPath_tooltip": "Pfad zum Zertifikat",
+    "keyPath": "Pfad zum Schlüssel",
+    "keyPath_tooltip": "Pfad zum Schlüssel",
+    "link to description": "Link zur Beschreibung"
 }
