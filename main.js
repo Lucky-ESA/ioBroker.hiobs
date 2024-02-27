@@ -11,6 +11,7 @@ const utils = require("@iobroker/adapter-core");
 // Load your modules here, e.g.:
 const { WebSocket, WebSocketServer } = require("ws");
 const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const { WebListener } = require("./lib/listener");
 const helper = require("./lib/helper");
 const tl = require("./lib/translator");
@@ -66,6 +67,7 @@ class Hiobs extends utils.Adapter {
             notify: "notification",
             wrongAesKey: "wrongAesKey",
             setNewAes: "setNewAes",
+            answer: "answerSubscribeToDataPoints",
         };
     }
 
@@ -148,6 +150,7 @@ class Hiobs extends utils.Adapter {
             ws.send(
                 JSON.stringify({
                     type: this.answers.first,
+                    content: {},
                 }),
             );
             if (this.clients[req.socket.remoteAddress]) {
@@ -293,7 +296,7 @@ class Hiobs extends utils.Adapter {
      * @param {string} id
      * @param {ioBroker.State | null | undefined} state
      */
-    onStateChange(id, state) {
+    async onStateChange(id, state) {
         if (state) {
             this.log_translator("debug", "state_change", `${id} - ${state.val}`);
             if (!state.ack && id.startsWith("hiobs.")) {
@@ -305,14 +308,14 @@ class Hiobs extends utils.Adapter {
                     this.setAckFlag(id);
                     if (command === "approved") {
                         if (state.val) {
-                            const key = this.makekey(512, false);
+                            const key = await this.genKey();
                             const map = {
                                 type: this.answers.loginKey,
-                                key: key,
+                                key: key[0],
                             };
                             if (this.clients[this.devices[index].ip]) {
-                                this.devices[index].key = key;
-                                this.setState(`${dev_id}.key`, this.decrypt(key), true);
+                                this.devices[index].key = key[1];
+                                this.setState(`${dev_id}.key`, this.decrypt(key[1]), true);
                                 this.clients[this.devices[index].ip].sendData(map);
                             }
                         } else {
@@ -488,6 +491,12 @@ class Hiobs extends utils.Adapter {
             result += characters.charAt(crypto.randomInt(0, charactersLength));
         }
         return result;
+    }
+
+    async genKey() {
+        const key = this.makekey(512, false);
+        const hashedKey = await bcrypt.hash(key, 5);
+        return [key, hashedKey];
     }
 }
 
