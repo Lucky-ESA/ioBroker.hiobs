@@ -50,7 +50,7 @@
         "main": "main.js",
         "icon": "hiobs.png",
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/Lucky-ESA/ioBroker.hiobs/main/admin/hiobs.png",
+        "extIcon": "https://raw.githubusercontent.com/Lucky-ESA/ioBroker.hiobs/master/admin/hiobs.png",
         "readme": "https://github.com/Lucky-ESA/ioBroker.hiobs/blob/main/README.md",
         "loglevel": "info",
         "mode": "daemon",
