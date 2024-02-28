@@ -126,10 +126,10 @@ class Hiobs extends utils.Adapter {
                 cert: fs.readFileSync(this.config.certPath),
                 key: fs.readFileSync(this.config.keyPath),
             });
-            this.log.info("[Server] Starting secure server...");
+            this.log_translator("info", "start_secure");
             this.ws = new WebSocketServer({ server: server, port: this.config.port });
         } else {
-            this.log.info("[Server] Starting server...");
+            this.log_translator("info", "start_server");
             this.ws = new WebSocketServer({ port: this.config.port });
         }
         this.ws.on("error", (e) => {
@@ -298,15 +298,15 @@ class Hiobs extends utils.Adapter {
      */
     async onStateChange(id, state) {
         if (state) {
-            this.log_translator("debug", "state_change", `${id} - ${state.val}`);
+            this.log_translator("debug", "state_change", ` - ${id} - ${state.val}`);
             if (!state.ack && id.startsWith("hiobs.")) {
                 const command = id.split(".").pop();
                 const dev_id = id.split(".")[2];
                 const index = this.devices.findIndex((devices) => devices.iob_id === dev_id);
                 if (index != -1 && command != null && this.devices[index][command] != null) {
                     this.devices[index][command] = state.val;
-                    this.setAckFlag(id);
                     if (command === "approved") {
+                        this.setAckFlag(id);
                         if (state.val) {
                             const key = await this.genKey();
                             const map = {
@@ -315,10 +315,11 @@ class Hiobs extends utils.Adapter {
                             };
                             if (this.clients[this.devices[index].ip]) {
                                 this.devices[index].key = key[1];
-                                this.setState(`${dev_id}.key`, this.decrypt(key[1]), true);
+                                this.setState(`${dev_id}.key`, this.encrypt(key[1]), true);
                                 this.clients[this.devices[index].ip].sendData(map);
                             }
                         } else {
+                            this.setState(`${dev_id}.key`, "", true);
                             if (this.clients[this.devices[index].ip]) {
                                 this.setState(`${dev_id}.key`, null, true);
                                 if (this.clients[this.devices[index].ip].isaliveRequest()) {
@@ -326,24 +327,45 @@ class Hiobs extends utils.Adapter {
                                 }
                             }
                         }
+                    } else if (command === "aesKey_new") {
+                        this.setAckFlag(id, { val: false });
+                        if (this.clients[this.devices[index].ip]) {
+                            this.setNewKey(this.clients[this.devices[index].ip], dev_id);
+                        }
+                    } else if (command === "aesKey_active") {
+                        this.setAckFlag(id);
+                        if (this.clients[this.devices[index].ip]) {
+                            this.clients[this.devices[index].ip].aes_check();
+                        }
+                    } else if (command === "noPwdAllowed") {
+                        this.setAckFlag(id);
                     }
                 } else if (command === "sendNotification") {
+                    this.setAckFlag(id);
                     const map = {
-                        onlySendNotification: true,
+                        type: this.answers.notify,
+                        onlySendNotification: false,
                         content: state.val,
+                        date: new Date(),
                     };
                     if (this.clients[this.devices[index].ip]) {
                         this.clients[this.devices[index].ip].sendNotify(map);
+                    } else {
+                        this.log_translator("info", "device_offline", dev_id);
+                        const notify = await this.getStateAsync(`${dev_id}.sendNotification_open`);
+                        if (notify && notify.val != null) {
+                            try {
+                                const open_notify = JSON.parse(notify.val.toString());
+                                open_notify.push(map);
+                                this.setState(`${dev_id}.sendNotification_open`, JSON.stringify(open_notify), true);
+                            } catch (e) {
+                                this.log_translator("warn", "cannot_parse");
+                            }
+                        }
                     }
-                } else if (command === "aesKey_new") {
+                } else if (command === "sendNotification_open_del") {
                     this.setAckFlag(id, { val: false });
-                    if (this.clients[this.devices[index].ip]) {
-                        this.setNewKey(this.clients[this.devices[index].ip], dev_id);
-                    }
-                } else if (command === "aesKey_active") {
-                    if (this.clients[this.devices[index].ip]) {
-                        this.clients[this.devices[index].ip].aes_check();
-                    }
+                    await this.setStateAsync(`${dev_id}.sendNotification_open`, JSON.stringify([]), true);
                 }
             } else if (this.subDatapoints[id] && this.subDatapoints[id].val != state.val) {
                 this.subDatapoints[id].val = state.val;
