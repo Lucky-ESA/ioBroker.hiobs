@@ -57,6 +57,8 @@
         "type": "communication",
         "compact": true,
         "connectionType": "local",
+        "messagebox": true,
+        "blockly": true,
         "dataSource": "push",
         "adminUI": {
             "config": "json"
@@ -78,7 +80,8 @@
         "history_instance": "",
         "useCert": false,
         "certPath": "",
-        "keyPath": ""
+        "keyPath": "",
+        "devices": []
     },
     "objects": [],
     "instanceObjects": [

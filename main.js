@@ -32,7 +32,7 @@ class Hiobs extends utils.Adapter {
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
         this.on("objectChange", this.onObjectChange.bind(this));
-        // this.on("message", this.onMessage.bind(this));
+        this.on("message", this.onMessage.bind(this));
         this.on("unload", this.onUnload.bind(this));
         this.createEnum = helper.createEnum;
         this.createDataPoint = helper.createDataPoint;
@@ -75,6 +75,7 @@ class Hiobs extends utils.Adapter {
      * Is called when databases are connected and adapter received configuration.
      */
     async onReady() {
+        await this.checkDevices();
         this.setState("info.connection", false, true);
         this.config.port = parseInt(this.config.port.toString(), 10) || 8095;
         if (this.config.port <= 1024) {
@@ -411,22 +412,34 @@ class Hiobs extends utils.Adapter {
     }
 
     // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
-    // /**
-    //  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-    //  * Using this method requires "common.messagebox" property to be set to true in io-package.json
-    //  * @param {ioBroker.Message} obj
-    //  */
-    // onMessage(obj) {
-    //     if (typeof obj === "object" && obj.message) {
-    //         if (obj.command === "send") {
-    //             // e.g. send email or pushover or whatever
-    //             this.log.info("send command");
-
-    //             // Send response in callback if required
-    //             if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
-    //         }
-    //     }
-    // }
+    /**
+     * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
+     * Using this method requires "common.messagebox" property to be set to true in io-package.json
+     * @param {ioBroker.Message} obj
+     */
+    onMessage(obj) {
+        if (typeof obj === "object" && obj.message) {
+            if (obj.command === "send") {
+                if (obj.message && obj.message.message != null && obj.message.uuid != null) {
+                    const index = this.devices.findIndex((devices) => devices.iob_id === obj.message.uuid);
+                    if (index != -1) {
+                        const map = {
+                            type: this.answers.notify,
+                            onlySendNotification: false,
+                            content: obj.message.message,
+                            date: new Date(),
+                        };
+                        this.clients[this.devices[index].ip].sendNotify(map);
+                        if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
+                    } else {
+                        if (obj.callback) this.sendTo(obj.from, obj.command, "Error", obj.callback);
+                    }
+                } else {
+                    if (obj.callback) this.sendTo(obj.from, obj.command, "Error", obj.callback);
+                }
+            }
+        }
+    }
 
     /**
      * @param {string} level
@@ -479,6 +492,40 @@ class Hiobs extends utils.Adapter {
             }
         } catch (e) {
             this.log.error(`try helper_translator: ${e} - ${text}`);
+        }
+    }
+
+    /**
+     *
+     */
+    async checkDevices() {
+        const devices = await this.getDevicesAsync();
+        const double_check_id = [];
+        const config_devices = this.config.devices;
+        let isDiff = false;
+        for (const element of devices) {
+            const id = element["_id"].split(".").pop();
+            double_check_id.push(id);
+            if (typeof id === "string" && id != null && Array.isArray(config_devices)) {
+                if (!config_devices.toString().includes(id)) {
+                    isDiff = true;
+                    config_devices.push(id);
+                }
+            }
+        }
+        this.log.debug(`${JSON.stringify(config_devices)}`);
+        this.log.debug(`${JSON.stringify(double_check_id)}`);
+        for (const element of config_devices) {
+            if (!double_check_id.toString().includes(element)) {
+                isDiff = true;
+                break;
+            }
+        }
+        if (isDiff) {
+            this.log.info(`Changed device config - ${double_check_id}`);
+            await this.extendForeignObjectAsync(`system.adapter.${this.namespace}`, {
+                native: { devices: double_check_id },
+            });
         }
     }
 
