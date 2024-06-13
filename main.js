@@ -46,6 +46,7 @@ class Hiobs extends utils.Adapter {
         this.clients = {};
         this.subDatapoints = {};
         this.all_enums = {};
+        this.aesViewTimeout = {};
         this.onlinecheck = null;
         this.history = null;
         this.autoRestartTimeout = null;
@@ -215,6 +216,7 @@ class Hiobs extends utils.Adapter {
             for (const element of devices) {
                 const id = element["_id"].split(".").pop();
                 this.setState(`${id}.connected`, false, true);
+                this.aesViewTimeout[id] && clearTimeout(this.aesViewTimeout[id]);
             }
             callback();
         } catch (e) {
@@ -252,6 +254,8 @@ class Hiobs extends utils.Adapter {
                             const subs = {
                                 val: value && value.val != null ? value.val : "",
                                 role: obj.common && obj.common.role ? obj.common.role : "state",
+                                write: obj.common && obj.common.write ? obj.common.write : false,
+                                read: obj.common && obj.common.read ? obj.common.read : false,
                             };
                             this.subDatapoints[member] = subs;
                         }
@@ -340,6 +344,11 @@ class Hiobs extends utils.Adapter {
                         }
                     } else if (command === "noPwdAllowed") {
                         this.setAckFlag(id);
+                    } else if (command === "aesKey_view") {
+                        this.setAckFlag(id, { val: false });
+                        if (this.clients[this.devices[index].ip]) {
+                            this.viewAesKey(dev_id);
+                        }
                     }
                 } else if (command === "sendNotification") {
                     this.setAckFlag(id);
@@ -381,13 +390,41 @@ class Hiobs extends utils.Adapter {
     }
 
     /**
-     * Is called if a subscribed state changes
+     * @param {string} id
+     */
+    async viewAesKey(id) {
+        if (!this.aesViewTimeout[id]) {
+            const state = await this.getStateAsync(`${id}.aesKey`);
+            if (state != null && state.val != null) {
+                if (state.val.toString().length > 6) {
+                    const dec_shaAes = this.decrypt(state.val.toString());
+                    await this.setStateAsync(`${id}.aesKey`, dec_shaAes, true);
+                }
+            } else {
+                return;
+            }
+            this.aesViewTimeout[id] = this.setTimeout(async () => {
+                const state = await this.getStateAsync(`${id}.aesKey`);
+                if (state != null && state.val != null) {
+                    if (state.val.toString().length === 6) {
+                        const shaAes = this.encrypt(state.val.toString());
+                        await this.setStateAsync(`${id}.aesKey`, shaAes, true);
+                    }
+                }
+                this.aesViewTimeout[id] = null;
+            }, 1000 * 60);
+        }
+    }
+
+    /**
      * @param {object} id
      * @param {string} client
      */
     async setNewKey(id, client) {
+        this.aesViewTimeout[client] && clearTimeout(this.aesViewTimeout[client]);
         const random_key = this.makekey(6, true);
-        await this.setStateAsync(`${client}.aesKey`, random_key, true);
+        const shaAes = this.encrypt(random_key.toString());
+        await this.setStateAsync(`${client}.aesKey`, shaAes, true);
         id.aes_check();
         id.setNewKey();
     }
@@ -510,6 +547,13 @@ class Hiobs extends utils.Adapter {
                 if (!config_devices.toString().includes(id)) {
                     isDiff = true;
                     config_devices.push(id);
+                }
+            }
+            const state = await this.getStateAsync(`${id}.aesKey`);
+            if (state != null && state.val != null) {
+                if (state.val.toString().length === 6) {
+                    const shaAes = this.encrypt(state.val.toString());
+                    await this.setStateAsync(`${element["_id"]}.aesKey`, shaAes, true);
                 }
             }
         }

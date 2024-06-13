@@ -221,7 +221,12 @@ Blockly.Blocks["hiob_notify"] = {
                 }
             }
         }
-        if (Object.keys(options).length == 0) options.push([Blockly.Translate("no_instance_found"), ""]);
+        if (Object.keys(options).length == 0) {
+            options.push([Blockly.Translate("no_instance_found"), ""]);
+            for (let u = 0; u <= 4; u++) {
+                options.push(["hiobs." + u, "." + u]);
+            }
+        }
         this.appendDummyInput("INSTANCE")
             .appendField(Blockly.Translate("hiob"))
             .appendField(new Blockly.FieldDropdown(options), "INSTANCE");
