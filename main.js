@@ -454,10 +454,10 @@ class Hiobs extends utils.Adapter {
      * Using this method requires "common.messagebox" property to be set to true in io-package.json
      * @param {ioBroker.Message} obj
      */
-    onMessage(obj) {
+    async onMessage(obj) {
         if (typeof obj === "object" && obj.message) {
             if (obj.command === "send") {
-                if (obj.message && obj.message.message != null && obj.message.uuid != null) {
+                if (obj.message && obj.message.uuid != null) {
                     const index = this.devices.findIndex((devices) => devices.iob_id === obj.message.uuid);
                     if (index != -1) {
                         const map = {
@@ -468,11 +468,13 @@ class Hiobs extends utils.Adapter {
                         };
                         this.clients[this.devices[index].ip].sendNotify(map);
                         if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
+                    } else if (obj.message.uuid === "all") {
+                        this.log.info("on work");
                     } else {
                         if (obj.callback) this.sendTo(obj.from, obj.command, "Error", obj.callback);
                     }
                 } else {
-                    if (obj.callback) this.sendTo(obj.from, obj.command, "Error", obj.callback);
+                    if (obj.callback) this.sendTo(obj.from, obj.command, "Error received", obj.callback);
                 }
             }
         }

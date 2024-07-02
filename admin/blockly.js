@@ -21,19 +21,6 @@ Blockly.Words["no_instance_found"] = {
     uk: "Не знайдено",
     "zh-cn": "未找到实例",
 };
-Blockly.Words["no_instance_found"] = {
-    en: "No instance found",
-    de: "Keine Instanz gefunden",
-    ru: "Не найден",
-    pt: "Nenhuma instância encontrada",
-    nl: "Geen instantie gevonden",
-    fr: "Aucune instance trouvée",
-    it: "Nessun caso trovato",
-    es: "No hay caso encontrado",
-    pl: "Brak",
-    uk: "Не знайдено",
-    "zh-cn": "未找到实例",
-};
 Blockly.Words["hiob"] = {
     en: "HioB",
     de: "HioB",
@@ -190,15 +177,103 @@ Blockly.Words["hiob_id"] = {
     uk: "Ідентифікатор телефону",
     "zh-cn": "电话号码",
 };
+Blockly.Words["hiob_title"] = {
+    en: "Title",
+    de: "Titel",
+    ru: "Название",
+    pt: "Título",
+    nl: "Titel",
+    fr: "Titre",
+    it: "Titolo",
+    es: "Título",
+    pl: "Tytuł",
+    uk: "Головна",
+    "zh-cn": "标题",
+};
+Blockly.Words["hiob_group"] = {
+    en: "Group",
+    de: "Gruppe",
+    ru: "Группа",
+    pt: "Grupo",
+    nl: "Groep",
+    fr: "Groupe",
+    it: "Gruppo",
+    es: "Grupo",
+    pl: "Grupa",
+    uk: "Група",
+    "zh-cn": "组",
+};
+Blockly.Words["hiob_lock"] = {
+    en: "discarded",
+    de: "verworfen",
+    ru: "выброшенные",
+    pt: "descartado",
+    nl: "weggegooid",
+    fr: "rejeté",
+    it: "scartato",
+    es: "descartado",
+    pl: "wyrzucić",
+    uk: "знежирений",
+    "zh-cn": "丢弃",
+};
+Blockly.Words["hiob_argb"] = {
+    en: "Color ARGB",
+    de: "Farbe ARGB",
+    ru: "Цвет ARGB",
+    pt: "Cor ARGB",
+    nl: "Kleur ARGB",
+    fr: "Couleur ARGB",
+    it: "Colore ARGB",
+    es: "Color ARGB",
+    pl: "Kolor ARGB",
+    uk: "Колір ARGB",
+    "zh-cn": "颜色 ARGB",
+};
+Blockly.Words["hiob_message_id"] = {
+    en: "Message Id",
+    de: "Nachricht Id",
+    ru: "Сообщение Id",
+    pt: "Mensagem Id",
+    nl: "Bericht-id",
+    fr: "Numéro de message",
+    it: "Messaggio",
+    es: "Mensaje Id",
+    pl: "Identyfikator wiadomości",
+    uk: "Повідомлення Id",
+    "zh-cn": "信件编号",
+};
 Blockly.Sendto.blocks["hiob_notify"] =
     '<block type="hiob_notify">' +
-    '     <value name="INSTANCE">' +
-    "     </value>" +
-    '     <value name="HIOB_DEVICES">' +
+    '     <field name="INSTANCE"></field>' +
+    '     <field name="HIOB_DEVICES"></field>' +
+    '     <value name="TITLE">' +
+    '         <shadow type="text">' +
+    '             <field name="TEXT">title</field>' +
+    "         </shadow>" +
     "     </value>" +
     '     <value name="MESSAGE">' +
     '         <shadow type="text">' +
     '             <field name="TEXT">message</field>' +
+    "         </shadow>" +
+    "     </value>" +
+    '     <value name="GROUP">' +
+    '         <shadow type="logic_boolean">' +
+    '             <field name="BOOL">FALSE</field>' +
+    "         </shadow>" +
+    "     </value>" +
+    '     <value name="LOCK">' +
+    '         <shadow type="logic_boolean">' +
+    '             <field name="BOOL">FALSE</field>' +
+    "         </shadow>" +
+    "     </value>" +
+    '     <value name="ARGB">' +
+    '         <shadow type="text">' +
+    '             <field name="TEXT">FFFFFFFF</field>' +
+    "         </shadow>" +
+    "     </value>" +
+    '     <value name="MESSAGE_ID">' +
+    '         <shadow type="math_number">' +
+    '             <field name="NUM">1</field>' +
     "         </shadow>" +
     "     </value>" +
     "</block>";
@@ -235,8 +310,12 @@ Blockly.Blocks["hiob_notify"] = {
             .appendField(Blockly.Translate("hiob_id"))
             .appendField(new Blockly.FieldDropdown(options_user), "HIOB_DEVICES");
 
-        this.appendValueInput("MESSAGE").appendField(Blockly.Translate("hiob_message"));
-
+        this.appendValueInput("MESSAGE").setCheck("String").appendField(Blockly.Translate("hiob_message"));
+        this.appendValueInput("TITLE").setCheck("String").appendField(Blockly.Translate("hiob_title"));
+        this.appendValueInput("GROUP").setCheck("Boolean").appendField(Blockly.Translate("hiob_group"));
+        this.appendValueInput("LOCK").setCheck("Boolean").appendField(Blockly.Translate("hiob_lock"));
+        this.appendValueInput("ARGB").setCheck("String").appendField(Blockly.Translate("hiob_argb"));
+        this.appendValueInput("MESSAGE_ID").setCheck("Number").appendField(Blockly.Translate("hiob_message_id"));
         this.appendDummyInput("LOG")
             .appendField(Blockly.Translate("hiob_log"))
             .appendField(
@@ -262,23 +341,41 @@ Blockly.Blocks["hiob_notify"] = {
 
 Blockly.JavaScript["hiob_notify"] = function (block) {
     const dropdown_instance = block.getFieldValue("INSTANCE");
-    const value_message = Blockly.JavaScript.valueToCode(block, "MESSAGE", Blockly.JavaScript.ORDER_ATOMIC);
-    const uuid_id = block.getFieldValue("HIOB_DEVICES");
+    const value_uuid_id = block.getFieldValue("HIOB_DEVICES");
     const logLevel = block.getFieldValue("LOG");
+    const value_message = Blockly.JavaScript.valueToCode(block, "MESSAGE", Blockly.JavaScript.ORDER_ATOMIC);
+    const value_title = Blockly.JavaScript.valueToCode(block, "TITLE", Blockly.JavaScript.ORDER_ATOMIC);
+    const value_group = Blockly.JavaScript.valueToCode(block, "GROUP", Blockly.JavaScript.ORDER_ATOMIC);
+    const value_lock = Blockly.JavaScript.valueToCode(block, "LOCK", Blockly.JavaScript.ORDER_ATOMIC);
+    const value_argb = Blockly.JavaScript.valueToCode(block, "ARGB", Blockly.JavaScript.ORDER_ATOMIC);
+    const value_message_id = Blockly.JavaScript.valueToCode(block, "MESSAGE_ID", Blockly.JavaScript.ORDER_ATOMIC);
 
-    let logText = "";
+    let text = "{\n";
+    text += '   uuid: "' + value_uuid_id + '",\n';
+    text += "   title: " + value_title + ",\n";
+    text += "   body: " + value_message + ",\n";
+    text += "   locked: " + value_lock + ",\n";
+    text += "   group: " + value_group + ",\n";
+    text += "   colorARGB: " + value_argb + ",\n";
+    text += "   id: " + value_message_id + ",\n";
+    text += "\n}";
+
+    let logText;
     if (logLevel) {
-        logText = "console." + logLevel + '("hiob - " + ' + value_message + ");\n";
+        logText = "console." + logLevel + '("hiobs: " + ' + text + ");\n";
+    } else {
+        logText = "";
     }
 
     return (
-        'sendTo("hiobs' +
-        dropdown_instance +
-        '", "send", {message: ' +
-        value_message +
-        ", uuid: '" +
-        uuid_id +
-        "'});\n" +
-        logText
+        `sendTo('hiobs${dropdown_instance}', 'send', {\n` +
+        `  uuid: "${value_uuid_id}",\n` +
+        `  title: ${value_title},\n` +
+        `  body: ${value_message},\n` +
+        `  locked: ${value_lock},\n` +
+        `  group: ${value_group},\n` +
+        `  colorARGB: ${value_argb},\n` +
+        `  id: ${value_message_id},\n` +
+        `});\n${logText}`
     );
 };
