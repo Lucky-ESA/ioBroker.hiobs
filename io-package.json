@@ -45,9 +45,12 @@
         },
         "authors": ["Lucky-ESA <github@luckyskills.de>"],
         "keywords": ["android"],
-        "license": "MIT",
+        "licenseInformation": {
+            "license": "MIT",
+            "type": "free"
+        },
+        "tier": 3,
         "platform": "Javascript/Node.js",
-        "main": "main.js",
         "icon": "hiobs.png",
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/Lucky-ESA/ioBroker.hiobs/master/admin/hiobs.png",
@@ -65,12 +68,12 @@
         },
         "dependencies": [
             {
-                "js-controller": ">=3.3.22"
+                "js-controller": ">=5.0.19"
             }
         ],
         "globalDependencies": [
             {
-                "admin": ">=5.1.13"
+                "admin": ">=6.13.16"
             }
         ]
     },
