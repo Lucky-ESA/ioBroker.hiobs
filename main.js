@@ -134,11 +134,11 @@ class Hiobs extends utils.Adapter {
             this.log_translator("info", "start_server");
             this.ws = new WebSocketServer({ port: this.config.port });
         }
-        this.ws.on("error", (e) => {
+        this.ws.on("error", e => {
             this.log_translator("error", "Error", `WebSocket - ${e.message}`);
             this.setState("info.connection", false, true);
         });
-        this.ws.on("close", (data) => {
+        this.ws.on("close", data => {
             this.log_translator("info", "websocket_closed", data);
             this.setState("info.connection", false, true);
             if (this.ws.readyState === WebSocket.CLOSED) {
@@ -181,7 +181,9 @@ class Hiobs extends utils.Adapter {
                         const status = this.clients[client.ip] ? this.clients[client.ip].status() : false;
                         this.log_translator("debug", "check_client", `${client.ip} - ${status}`);
                         check = true;
-                        if (status) this.clients[client.ip].onPing();
+                        if (status) {
+                            this.clients[client.ip].onPing();
+                        }
                     }
                 }
                 if (!check) {
@@ -205,6 +207,7 @@ class Hiobs extends utils.Adapter {
 
     /**
      * Is called when adapter shuts down - callback has to be called under any circumstances!
+     *
      * @param {() => void} callback
      */
     async onUnload(callback) {
@@ -219,7 +222,7 @@ class Hiobs extends utils.Adapter {
                 this.aesViewTimeout[id] && clearTimeout(this.aesViewTimeout[id]);
             }
             callback();
-        } catch (e) {
+        } catch {
             callback();
         }
     }
@@ -228,6 +231,7 @@ class Hiobs extends utils.Adapter {
     // You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
     /**
      * Is called if a subscribed object changes
+     *
      * @param {string} id
      * @param {ioBroker.Object | null | undefined} obj
      */
@@ -261,7 +265,9 @@ class Hiobs extends utils.Adapter {
                         }
                     }
                 }
-                if (!isNew) member_list = [];
+                if (!isNew) {
+                    member_list = [];
+                }
                 for (const member of old_members) {
                     if (new_members.includes(member)) {
                         member_list.push(member);
@@ -277,9 +283,9 @@ class Hiobs extends utils.Adapter {
                 this.log_translator("info", "all_enmu_del", id);
                 this.all_enums = {};
                 return;
-            } else {
-                this.log_translator("info", "enmu_del", id);
             }
+            this.log_translator("info", "enmu_del", id);
+
             if (!this.all_enums[id]) {
                 this.log_translator("info", "unknown_member", id);
             } else {
@@ -298,6 +304,7 @@ class Hiobs extends utils.Adapter {
 
     /**
      * Is called if a subscribed state changes
+     *
      * @param {string} id
      * @param {ioBroker.State | null | undefined} state
      */
@@ -307,7 +314,7 @@ class Hiobs extends utils.Adapter {
             if (!state.ack && id.startsWith("hiobs.")) {
                 const command = id.split(".").pop();
                 const dev_id = id.split(".")[2];
-                const index = this.devices.findIndex((devices) => devices.iob_id === dev_id);
+                const index = this.devices.findIndex(devices => devices.iob_id === dev_id);
                 if (index != -1 && command != null && this.devices[index][command] != null) {
                     this.devices[index][command] = state.val;
                     if (command === "approved") {
@@ -368,7 +375,7 @@ class Hiobs extends utils.Adapter {
                                 const open_notify = JSON.parse(notify.val.toString());
                                 open_notify.push(map);
                                 this.setState(`${dev_id}.sendNotification_open`, JSON.stringify(open_notify), true);
-                            } catch (e) {
+                            } catch {
                                 this.log_translator("warn", "cannot_parse");
                             }
                         }
@@ -431,6 +438,7 @@ class Hiobs extends utils.Adapter {
 
     /**
      * Is called if a subscribed state changes
+     *
      * @param {string} id
      * @param {ioBroker.State | null | undefined} state
      */
@@ -452,13 +460,14 @@ class Hiobs extends utils.Adapter {
     /**
      * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
      * Using this method requires "common.messagebox" property to be set to true in io-package.json
+     *
      * @param {ioBroker.Message} obj
      */
     async onMessage(obj) {
         if (typeof obj === "object" && obj.message) {
             if (obj.command === "send") {
                 if (obj.message && obj.message.uuid != null) {
-                    const index = this.devices.findIndex((devices) => devices.iob_id === obj.message.uuid);
+                    const index = this.devices.findIndex(devices => devices.iob_id === obj.message.uuid);
                     if (index != -1) {
                         const map = {
                             type: this.answers.notify,
@@ -467,14 +476,20 @@ class Hiobs extends utils.Adapter {
                             date: new Date(),
                         };
                         this.clients[this.devices[index].ip].sendNotify(map);
-                        if (obj.callback) this.sendTo(obj.from, obj.command, "Message received", obj.callback);
+                        if (obj.callback) {
+                            this.sendTo(obj.from, obj.command, "Message received", obj.callback);
+                        }
                     } else if (obj.message.uuid === "all") {
                         this.log.info("on work");
                     } else {
-                        if (obj.callback) this.sendTo(obj.from, obj.command, "Error", obj.callback);
+                        if (obj.callback) {
+                            this.sendTo(obj.from, obj.command, "Error", obj.callback);
+                        }
                     }
                 } else {
-                    if (obj.callback) this.sendTo(obj.from, obj.command, "Error received", obj.callback);
+                    if (obj.callback) {
+                        this.sendTo(obj.from, obj.command, "Error received", obj.callback);
+                    }
                 }
             }
         }
@@ -490,7 +505,9 @@ class Hiobs extends utils.Adapter {
     log_translator(level, text, merge_1, merge_2, merge_3) {
         try {
             let loglevel = true;
-            if (this.loglevel !== "debug" && level === "debug") loglevel = false;
+            if (this.loglevel !== "debug" && level === "debug") {
+                loglevel = false;
+            }
             if (loglevel) {
                 if (tl.trans[text] != null) {
                     if (merge_3) {
@@ -523,20 +540,15 @@ class Hiobs extends utils.Adapter {
                     return format(tl.trans[text][this.lang], merge, merge_1);
                 } else if (merge) {
                     return format(tl.trans[text][this.lang], merge);
-                } else {
-                    return tl.trans[text][this.lang];
                 }
-            } else {
-                return tl.trans["Unknown"][this.lang];
+                return tl.trans[text][this.lang];
             }
+            return tl.trans["Unknown"][this.lang];
         } catch (e) {
             this.log.error(`try helper_translator: ${e} - ${text}`);
         }
     }
 
-    /**
-     *
-     */
     async checkDevices() {
         const devices = await this.getDevicesAsync();
         const double_check_id = [];
@@ -594,6 +606,7 @@ class Hiobs extends utils.Adapter {
 
     /**
      * @param {number} length
+     * @param {boolean} woCharacters
      */
     makekey(length, woCharacters) {
         let result = "";
@@ -620,7 +633,7 @@ if (require.main !== module) {
     /**
      * @param {Partial<utils.AdapterOptions>} [options={}]
      */
-    module.exports = (options) => new Hiobs(options);
+    module.exports = options => new Hiobs(options);
 } else {
     // otherwise start the instance directly
     new Hiobs();
