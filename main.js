@@ -260,6 +260,9 @@ class Hiobs extends utils.Adapter {
                                 role: obj.common && obj.common.role ? obj.common.role : "state",
                                 write: obj.common && obj.common.write ? obj.common.write : false,
                                 read: obj.common && obj.common.read ? obj.common.read : false,
+                                ack: value != null ? value.ack : false,
+                                ts: value != null ? value.ts : 0,
+                                lc: value != null ? value.lc : 0,
                             };
                             this.subDatapoints[member] = subs;
                         }
@@ -382,7 +385,7 @@ class Hiobs extends utils.Adapter {
                     }
                 } else if (command === "sendNotification_open_del") {
                     this.setAckFlag(id, { val: false });
-                    await this.setStateAsync(`${dev_id}.sendNotification_open`, JSON.stringify([]), true);
+                    await this.setState(`${dev_id}.sendNotification_open`, { val: JSON.stringify([]), ack: true });
                 }
             } else if (this.subDatapoints[id] && this.subDatapoints[id].val != state.val) {
                 this.subDatapoints[id].val = state.val;
@@ -405,7 +408,7 @@ class Hiobs extends utils.Adapter {
             if (state != null && state.val != null) {
                 if (state.val.toString().length > 6) {
                     const dec_shaAes = this.decrypt(state.val.toString());
-                    await this.setStateAsync(`${id}.aesKey`, dec_shaAes, true);
+                    await this.setState(`${id}.aesKey`, { val: dec_shaAes, ack: true });
                 }
             } else {
                 return;
@@ -415,7 +418,7 @@ class Hiobs extends utils.Adapter {
                 if (state != null && state.val != null) {
                     if (state.val.toString().length === 6) {
                         const shaAes = this.encrypt(state.val.toString());
-                        await this.setStateAsync(`${id}.aesKey`, shaAes, true);
+                        await this.setState(`${id}.aesKey`, { val: shaAes, ack: true });
                     }
                 }
                 this.aesViewTimeout[id] = null;
@@ -431,7 +434,7 @@ class Hiobs extends utils.Adapter {
         this.aesViewTimeout[client] && clearTimeout(this.aesViewTimeout[client]);
         const random_key = this.makekey(6, true);
         const shaAes = this.encrypt(random_key.toString());
-        await this.setStateAsync(`${client}.aesKey`, shaAes, true);
+        await this.setState(`${client}.aesKey`, { val: shaAes, ack: true });
         id.aes_check();
         id.setNewKey();
     }
@@ -444,12 +447,18 @@ class Hiobs extends utils.Adapter {
      */
     sendNewValueOnAllClients(id, state) {
         const value = state && state.val != null ? state.val : "";
+        if (state == null) {
+            return;
+        }
         for (const client of this.ws.clients) {
             if (client.readyState === WebSocket.OPEN && client.ip && this.clients[client.ip] != null) {
                 const map = {
                     type: this.answers.change,
                     objectID: id,
                     value: value,
+                    ack: state.ack,
+                    ts: state.ts,
+                    lc: state.lc,
                 };
                 this.clients[client.ip].sendData(map);
             }
@@ -567,7 +576,7 @@ class Hiobs extends utils.Adapter {
             if (state != null && state.val != null) {
                 if (state.val.toString().length === 6) {
                     const shaAes = this.encrypt(state.val.toString());
-                    await this.setStateAsync(`${element["_id"]}.aesKey`, shaAes, true);
+                    await this.setState(`${element["_id"]}.aesKey`, { val: shaAes, ack: true });
                 }
             }
         }
