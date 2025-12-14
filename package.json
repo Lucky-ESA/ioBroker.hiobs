@@ -1,58 +1,58 @@
 {
-    "name": "iobroker.hiobs",
-    "version": "0.0.1",
-    "description": "Andriod HIOB",
-    "author": {
-        "name": "Lucky-ESA",
-        "email": "github@luckyskills.de"
-    },
-    "homepage": "https://github.com/Lucky-ESA/ioBroker.hiobs",
-    "license": "MIT",
-    "keywords": [
-        "android"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Lucky-ESA/ioBroker.hiobs.git"
-    },
-    "engines": {
-        "node": ">= 20"
-    },
-    "dependencies": {
-        "@iobroker/adapter-core": "^3.3.2",
-        "bcrypt": "^5.1.1",
-        "crypto-js": "^4.2.0",
-        "ws": "^8.18.3"
-    },
-    "devDependencies": {
-        "@iobroker/adapter-dev": "^1.5.0",
-        "@iobroker/eslint-config": "^2.1.0",
-        "@iobroker/testing": "^5.1.1",
-        "@tsconfig/node18": "^18.2.4",
-        "@types/node": "^22.18.0",
-        "typescript": "~5.9.3"
-    },
-    "main": "main.js",
-    "files": [
-        "admin{,/!(src)/**}/!(tsconfig|tsconfig.*|.eslintrc).json",
-        "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
-        "lib/",
-        "www/",
-        "io-package.json",
-        "LICENSE",
-        "main.js"
-    ],
-    "scripts": {
-        "test:js": "mocha --config test/mocharc.custom.json \"{!(node_modules|test)/**/*.test.js,*.test.js,test/**/test!(PackageFiles|Startup).js}\"",
-        "test:package": "mocha test/package --exit",
-        "test:integration": "mocha test/integration --exit",
-        "test": "npm run test:js && npm run test:package",
-        "check": "tsc --noEmit -p tsconfig.check.json",
-        "lint": "eslint -c eslint.config.mjs .",
-        "translate": "translate-adapter"
-    },
-    "bugs": {
-        "url": "https://github.com/Lucky-ESA/ioBroker.hiobs/issues"
-    },
-    "readmeFilename": "README.md"
+  "name": "iobroker.hiobs",
+  "version": "0.0.1",
+  "description": "Andriod HIOB",
+  "author": {
+    "name": "Lucky-ESA",
+    "email": "github@luckyskills.de"
+  },
+  "homepage": "https://github.com/Lucky-ESA/ioBroker.hiobs",
+  "license": "MIT",
+  "keywords": [
+    "android"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lucky-ESA/ioBroker.hiobs.git"
+  },
+  "engines": {
+    "node": ">= 20"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.3.2",
+    "bcrypt": "^5.1.1",
+    "crypto-js": "^4.2.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@iobroker/adapter-dev": "^1.5.0",
+    "@iobroker/eslint-config": "^2.2.0",
+    "@iobroker/testing": "^5.2.2",
+    "@tsconfig/node18": "^18.2.6",
+    "@types/node": "^25.0.2",
+    "typescript": "~5.9.3"
+  },
+  "main": "main.js",
+  "files": [
+    "admin{,/!(src)/**}/!(tsconfig|tsconfig.*|.eslintrc).json",
+    "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
+    "lib/",
+    "www/",
+    "io-package.json",
+    "LICENSE",
+    "main.js"
+  ],
+  "scripts": {
+    "test:js": "mocha --config test/mocharc.custom.json \"{!(node_modules|test)/**/*.test.js,*.test.js,test/**/test!(PackageFiles|Startup).js}\"",
+    "test:package": "mocha test/package --exit",
+    "test:integration": "mocha test/integration --exit",
+    "test": "npm run test:js && npm run test:package",
+    "check": "tsc --noEmit -p tsconfig.check.json",
+    "lint": "eslint -c eslint.config.mjs .",
+    "translate": "translate-adapter"
+  },
+  "bugs": {
+    "url": "https://github.com/Lucky-ESA/ioBroker.hiobs/issues"
+  },
+  "readmeFilename": "README.md"
 }
