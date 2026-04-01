@@ -22,7 +22,7 @@
     "@iobroker/adapter-core": "^3.3.2",
     "bcrypt": "^5.1.1",
     "crypto-js": "^4.2.0",
-    "ws": "^8.18.3"
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@iobroker/adapter-dev": "^1.5.0",
