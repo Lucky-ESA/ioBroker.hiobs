@@ -19,7 +19,7 @@
     "node": ">= 22"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.3.2",
+    "@iobroker/adapter-core": "^3.4.1",
     "bcrypt": "^5.1.1",
     "crypto-js": "^4.2.0",
     "ws": "^8.20.0"
